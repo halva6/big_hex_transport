@@ -51,6 +51,7 @@ typedef struct GameState
     UIAssets *uiAssets;
     bool exitWindowRequested;
     bool exitWindow;
+    Camera2D *camera;
 }GameState;
 
 void update_draw_frame(GameState *state);

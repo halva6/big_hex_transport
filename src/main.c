@@ -2,7 +2,6 @@
 #include "../include/game.h"
 #include "../include/level.h"
 #include <raylib.h>
-#include <stdbool.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
@@ -62,11 +61,14 @@ int main()
     Level level;
     GameInputs inputs;
     ButtonEvents events;
+    Camera2D camera;
+    camera.zoom = 1.0f;
     GameState state;
 
     init_game(&level, &inputs, &state);
     state.uiAssets = &uiAssets;
     state.events = &events;
+    state.camera = &camera;
 
 #if defined(PLATFORM_WEB)
     web_state = state;

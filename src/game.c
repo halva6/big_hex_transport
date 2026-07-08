@@ -1,5 +1,5 @@
 #include "../include/game.h"
-
+#include "raymath.h"
 void update_inputs(GameState *state)
 {
     // key inputs
@@ -15,6 +15,14 @@ void update_inputs(GameState *state)
     if (CheckCollisionPointRec(mousePos, state->events->titleExitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
     {
         state->exitWindowRequested = true;
+    }
+
+    // Translate based on mouse right click
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 delta = GetMouseDelta();
+        delta = Vector2Scale(delta, -1.0f / state->camera->zoom);
+        state->camera->target = Vector2Add(state->camera->target, delta);
     }
 }
 
@@ -109,19 +117,48 @@ void draw_game_ui(GameState *state)
 
 void draw_game_screen(GameState *state)
 {
+    BeginMode2D(*(state->camera));
     if (state->inputs->isGridActive)
     {
         draw_grid();
     }
+    DrawCircle(GetScreenWidth() / 2, GetScreenHeight() / 2, 20, MAROON);
+    EndMode2D();
+
     draw_game_ui(state);
     DrawFPS(600, 20);
 }
 
 void draw_ending_screen() {}
 
+void update_camera(GameState *state)
+{
+    // Zoom based on mouse wheel
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0)
+    {
+        // Get the world point that is under the mouse
+        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), *(state->camera));
+
+        // Set the offset to where the mouse is
+        state->camera->offset = GetMousePosition();
+
+        // Set the target to match, so that the camera maps the world space point
+        // under the cursor to the screen space point under the cursor at any zoom
+        state->camera->target = mouseWorldPos;
+
+        // Zoom increment
+        // Uses log scaling to provide consistent zoom speed
+        float scale = 0.2f * wheel;
+        // the last to numbers are the min and the max
+        state->camera->zoom = Clamp(expf(logf(state->camera->zoom) + scale), 1.0f, 2.0f);
+    }
+}
+
 void update_draw_frame(GameState *state)
 {
     update_inputs(state);
+    update_camera(state);
     switch (state->currentScreen)
     {
     case LOGO:
