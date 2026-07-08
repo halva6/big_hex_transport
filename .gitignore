@@ -53,3 +53,10 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# the build folder
+/build/
+build-native/
+
+# the format file for zed
+.clang-format
