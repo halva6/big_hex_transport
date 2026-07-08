@@ -1,7 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 #include "raylib.h"
-#include <raylib.h>
 #include <stdbool.h>
 #include <stdio.h>
 
