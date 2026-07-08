@@ -1,12 +1,31 @@
 #include "../include/main.h"
 #include "../include/game.h"
 #include "../include/level.h"
+#include <raylib.h>
+#include <stdbool.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
 GameState webState;
 #endif
 
+void loadAssets(UIAssets *uiAssets)
+{
+    uiAssets->buildmanFactoryLogo = LoadTexture("assets/ui/BuildmanFactoryIcon.png");
+    uiAssets->pause = LoadTexture("assets/ui/Pause.png");
+    uiAssets->play = LoadTexture("assets/ui/Play.png");
+    uiAssets->doublePlay = LoadTexture("assets/ui/DoublePlay.png");
+    uiAssets->stylishUiEnchancement = LoadTexture("assets/ui/Stylish_UI_enhancement.png");
+}
+
+void unload_assets(UIAssets *uiAssets)
+{
+    UnloadTexture(uiAssets->buildmanFactoryLogo);
+    UnloadTexture(uiAssets->pause);
+    UnloadTexture(uiAssets->play);
+    UnloadTexture(uiAssets->doublePlay);
+    UnloadTexture(uiAssets->stylishUiEnchancement);
+};
 void init_game(Level *level, GameInputs *inputs, GameState *state)
 {
     create_game_level(level->level);
@@ -24,6 +43,8 @@ void init_game(Level *level, GameInputs *inputs, GameState *state)
     state->currentScreen = LOGO;
     state->frameCounter = 0;
     state->level = level;
+    state->exitWindowRequested = false;
+    state->exitWindow = false;
 }
 
 #if defined(PLATFORM_WEB)
@@ -35,11 +56,17 @@ int main()
     // start raylib
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Big Hex Transport");
 
+    UIAssets uiAssets;
+    loadAssets(&uiAssets);
+
     Level level;
     GameInputs inputs;
+    ButtonEvents events;
     GameState state;
 
     init_game(&level, &inputs, &state);
+    state.uiAssets = &uiAssets;
+    state.events = &events;
 
 #if defined(PLATFORM_WEB)
     web_state = state;
@@ -47,12 +74,30 @@ int main()
 #else
     SetTargetFPS(60);
     // Main game loop
-    while (!WindowShouldClose())
+    while (!state.exitWindow)
     {
+        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE))
+        {
+            state.exitWindowRequested = true;
+        }
+        if (state.exitWindowRequested)
+        {
+            // A request for close window has been issued, we can save data before closing
+            // or just show a message asking for confirmation
+            if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_Z))
+            {
+                state.exitWindow = true;
+            }
+            else if (IsKeyPressed(KEY_N))
+            {
+                state.exitWindowRequested = false;
+            }
+        }
         update_draw_frame(&state);
     }
 #endif
 
+    unload_assets(&uiAssets);
     CloseWindow();
 
     return 0;
