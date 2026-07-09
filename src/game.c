@@ -1,5 +1,6 @@
 #include "../include/game.h"
 #include "raymath.h"
+#include <raylib.h>
 void update_inputs(GameState *state)
 {
     // key inputs
@@ -18,7 +19,7 @@ void update_inputs(GameState *state)
     }
 
     // Translate based on mouse right click
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
         Vector2 delta = GetMouseDelta();
         delta = Vector2Scale(delta, -1.0f / state->camera->zoom);
@@ -122,9 +123,14 @@ void draw_game_screen(GameState *state)
     {
         draw_grid();
     }
-    DrawCircle(GetScreenWidth() / 2, GetScreenHeight() / 2, 20, MAROON);
-    EndMode2D();
 
+    for (int i = 0; i < state->level->countSpawner; i++)
+    {
+        Spawner spawner = state->level->spawner[i];
+        DrawTexture(spawner.texture, spawner.x * CELL_SIZE, spawner.y * CELL_SIZE, WHITE);
+    }
+
+    EndMode2D();
     draw_game_ui(state);
     DrawFPS(600, 20);
 }

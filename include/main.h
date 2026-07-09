@@ -9,8 +9,8 @@
 #define TARGET_FPS 60
 
 #define CELL_SIZE 20
-#define LEVEL_WIDTH 45
-#define LEVEL_HEIGHT 45
+#define LEVEL_WIDTH 36
+#define LEVEL_HEIGHT 36
 
 int main();
 #endif

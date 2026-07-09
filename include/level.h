@@ -1,18 +1,39 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 #include "../include/main.h"
+#include <raylib.h>
+
+typedef struct ConveyorBelt
+{
+    Vector2 pos;
+    Texture2D texture;
+}
+ConveyorBelt;
+
+typedef struct Spawner
+{
+
+    Texture2D texture;
+    unsigned int x;
+    unsigned int y;
+    unsigned int width;
+    unsigned int height;
+}
+Spawner;
 
 typedef struct Level
 {
-    unsigned int level[LEVEL_WIDTH * LEVEL_HEIGHT];
-    unsigned int count_conveyor_belt;
-    unsigned int count_adder;
-    unsigned int count_left_shift;
-    unsigned int count_splitter;
-    unsigned int count_spawner;
+    unsigned int levelArr[LEVEL_WIDTH * LEVEL_HEIGHT];
+    unsigned int countConveyorBelt;
+    unsigned int countAdder;
+    unsigned int countLeftShift;
+    unsigned int countSplitter;
+    unsigned int countSpawner;
+    Spawner *spawner;
 }Level;
 
-void create_game_level(unsigned int *level);
-void print_level(unsigned int *level);
+void create_game_level(unsigned int *levelArr);
+void prepare_spawner(Level *level);
+void print_level(unsigned int *levelArr);
 
 #endif

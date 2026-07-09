@@ -16,7 +16,7 @@ UIAssets;
 typedef struct UIText
 {
     char *text;
-    int fontSize;
+    unsigned int fontSize;
     Color textColor;
 }
 UIText ;

@@ -2,13 +2,23 @@
 #include "../include/game.h"
 #include "../include/level.h"
 #include <raylib.h>
+#include <stdlib.h>
 
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
 GameState webState;
 #endif
 
-void loadAssets(UIAssets *uiAssets)
+void unloadGameAssets(Level *level)
+{
+    for (int i = 0; i < level->countSpawner; i++)
+    {
+        UnloadTexture(level->spawner[i].texture);
+    }
+    free(level->spawner);
+}
+
+void loadUIAssets(UIAssets *uiAssets)
 {
     uiAssets->buildmanFactoryLogo = LoadTexture("assets/ui/BuildmanFactoryIcon.png");
     uiAssets->pause = LoadTexture("assets/ui/Pause.png");
@@ -17,7 +27,7 @@ void loadAssets(UIAssets *uiAssets)
     uiAssets->stylishUiEnchancement = LoadTexture("assets/ui/Stylish_UI_enhancement.png");
 }
 
-void unload_assets(UIAssets *uiAssets)
+void unloadUIAssets(UIAssets *uiAssets)
 {
     UnloadTexture(uiAssets->buildmanFactoryLogo);
     UnloadTexture(uiAssets->pause);
@@ -27,14 +37,15 @@ void unload_assets(UIAssets *uiAssets)
 };
 void init_game(Level *level, GameInputs *inputs, GameState *state)
 {
-    create_game_level(level->level);
-    // print_level(level->level);
+    create_game_level(level->levelArr);
 
-    level->count_conveyor_belt = 40;
-    level->count_adder = 5;
-    level->count_left_shift = 3;
-    level->count_splitter = 3;
-    level->count_spawner = 2;
+    level->countConveyorBelt = 40;
+    level->countAdder = 5;
+    level->countLeftShift = 3;
+    level->countSplitter = 3;
+    level->countSpawner = 3;
+    prepare_spawner(level);
+    // print_level(level->levelArr);
 
     inputs->isGridActive = false;
 
@@ -56,7 +67,7 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Big Hex Transport");
 
     UIAssets uiAssets;
-    loadAssets(&uiAssets);
+    loadUIAssets(&uiAssets);
 
     Level level;
     GameInputs inputs;
@@ -99,7 +110,8 @@ int main()
     }
 #endif
 
-    unload_assets(&uiAssets);
+    unloadGameAssets(&level);
+    unloadUIAssets(&uiAssets);
     CloseWindow();
 
     return 0;
