@@ -31,6 +31,8 @@ void pauseButtonEvent(Events *events) { fprintf(stderr, "pause \n"); }
 void playButtonEvent(Events *events) { fprintf(stderr, "play \n"); }
 void doublePlayButtonEvent(Events *events) { fprintf(stderr, "double play \n"); }
 
+void exitGamePlayButtonEvent(Events *events) { events->exitGameRequested = true; }
+
 void draw_logo_screen(UIAssets *uiAssets) {}
 
 void update_game(GameState *state) {}
@@ -100,7 +102,6 @@ void handleExits(GameState *state, Events *events)
     if (IsKeyPressed(KEY_ESCAPE) && state->currentScreen == GAMEPLAY)
     {
         events->exitGameRequested = true;
-        printf("Wild\n");
     }
     else if (WindowShouldClose() || (IsKeyPressed(KEY_ESCAPE) && state->currentScreen == TITLE))
     {
@@ -147,14 +148,6 @@ void update_draw_frame(GameState *state)
     {
     case LOGO:
     {
-        if (state->frameCounter == 0)
-        {
-            connectButtonById(state->uiHandler, "start", &startButtonEvent);
-            connectButtonById(state->uiHandler, "exit", &exitButtonEvent);
-            connectButtonById(state->uiHandler, "pause", &pauseButtonEvent);
-            connectButtonById(state->uiHandler, "play", &playButtonEvent);
-            connectButtonById(state->uiHandler, "doublePlay", &doublePlayButtonEvent);
-        }
         state->frameCounter++;
 
         if (state->frameCounter > 60)

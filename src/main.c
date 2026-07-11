@@ -69,6 +69,13 @@ int main()
     init_game(&level, &events, &uiHandler, &state);
     state.camera = &camera;
 
+    connectButtonById(state.uiHandler, "start", &startButtonEvent);
+    connectButtonById(state.uiHandler, "exit", &exitButtonEvent);
+    connectButtonById(state.uiHandler, "pause", &pauseButtonEvent);
+    connectButtonById(state.uiHandler, "play", &playButtonEvent);
+    connectButtonById(state.uiHandler, "doublePlay", &doublePlayButtonEvent);
+    connectButtonById(state.uiHandler, "exitGamePlay", &exitGamePlayButtonEvent);
+
 #if defined(PLATFORM_WEB)
     web_state = state;
     web emscripten_set_main_loop(web_loop, 0, 1);

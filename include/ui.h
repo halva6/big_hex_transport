@@ -12,6 +12,7 @@ typedef struct UIAssets
     Texture2D pause;
     Texture2D doublePlay;
     Texture2D stylishUiEnchancement;
+    Texture2D exitGamePlay;
 }
 UIAssets;
 

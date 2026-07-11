@@ -12,6 +12,7 @@ void loadUIAssets(UIAssets *uiAssets)
     uiAssets->play = LoadTexture("assets/ui/Play.png");
     uiAssets->doublePlay = LoadTexture("assets/ui/DoublePlay.png");
     uiAssets->stylishUiEnchancement = LoadTexture("assets/ui/Stylish_UI_enhancement.png");
+    uiAssets->exitGamePlay = LoadTexture("assets/ui/Exit.png");
 }
 
 void calcCenteredRect(u_int x, u_int y, u_int textSize, u_int fontsize, Rectangle *rect, u_int padding)
@@ -75,7 +76,7 @@ void createUI(UIHandler *uiHandler)
     uiHandler->buttons[1] = exitButton;
 
     // sprite buttons
-    uiHandler->countSpriteButtons = 3;
+    uiHandler->countSpriteButtons = 4;
     // calculate uiHandler->assets->pause.height / 3 because there are three states of the button
     Rectangle pauseButtonRect = {0, 0, uiHandler->assets->pause.width, (int)(uiHandler->assets->pause.height / 3)};
     UISpriteButton pauseButton = {uiHandler->assets->pause, pauseButtonRect, (Vector2){32, 16}, NORMAL, GAMEPLAY, "pause", true};
@@ -85,10 +86,14 @@ void createUI(UIHandler *uiHandler)
 
     Rectangle doublePlayButtonRect = {0, 0, uiHandler->assets->doublePlay.width, (int)(uiHandler->assets->doublePlay.height / 3)};
     UISpriteButton doublePlayButton = {uiHandler->assets->doublePlay, doublePlayButtonRect, (Vector2){160, 16}, NORMAL, GAMEPLAY, "doublePlay", true};
+
+    Rectangle exitGameButtonRect = {0, 0, uiHandler->assets->exitGamePlay.width, (int)(uiHandler->assets->exitGamePlay.height / 3)};
+    UISpriteButton exitGameButton = {uiHandler->assets->exitGamePlay, exitGameButtonRect, (Vector2){430, 16}, NORMAL, GAMEPLAY, "exitGamePlay", true};
     uiHandler->spriteButtons = malloc(uiHandler->countSpriteButtons * sizeof(UISpriteButton));
     uiHandler->spriteButtons[0] = pauseButton;
     uiHandler->spriteButtons[1] = playButton;
     uiHandler->spriteButtons[2] = doublePlayButton;
+    uiHandler->spriteButtons[3] = exitGameButton;
 
     // sprites (only ui sprites)
     uiHandler->countSprites = 2;
