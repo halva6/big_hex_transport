@@ -12,5 +12,19 @@
 #define LEVEL_WIDTH 36
 #define LEVEL_HEIGHT 36
 
+typedef enum GameScreen { LOGO = 0, TITLE, GAMEPLAY, ENDING } GameScreen;
+
+typedef struct Events
+{
+    bool isGridActive;
+    bool isGameStarted;
+    bool isPaused;
+    bool isPlayed;
+    bool isDoublePlayed;
+    bool exitWindowRequested;
+    bool exitWindow;
+    bool exitGameRequested;
+} Events;
+
 int main();
 #endif

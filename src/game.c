@@ -1,23 +1,19 @@
 #include "../include/game.h"
+#include "../include/ui.h"
+#include "raylib.h"
 #include "raymath.h"
-#include <raylib.h>
+#include <stdbool.h>
+#include <stdio.h>
+
 void update_inputs(GameState *state)
 {
     // key inputs
     if (IsKeyReleased(KEY_G))
     {
-        state->inputs->isGridActive = !state->inputs->isGridActive;
-    }
-    Vector2 mousePos = GetMousePosition();
-    if (CheckCollisionPointRec(mousePos, state->events->titleStartButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-    {
-        state->inputs->isGameStarted = true;
-    }
-    if (CheckCollisionPointRec(mousePos, state->events->titleExitButton) && IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-    {
-        state->exitWindowRequested = true;
+        state->events->isGridActive = !state->events->isGridActive;
     }
 
+    Vector2 mousePos = GetMousePosition();
     // Translate based on mouse right click
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
@@ -27,72 +23,19 @@ void update_inputs(GameState *state)
     }
 }
 
+void startButtonEvent(Events *events) { events->isGameStarted = true; }
+
+void exitButtonEvent(Events *events) { events->exitWindowRequested = true; }
+
+void pauseButtonEvent(Events *events) { fprintf(stderr, "pause \n"); }
+void playButtonEvent(Events *events) { fprintf(stderr, "play \n"); }
+void doublePlayButtonEvent(Events *events) { fprintf(stderr, "double play \n"); }
+
+void draw_logo_screen(UIAssets *uiAssets) {}
+
 void update_game(GameState *state) {}
 
-void draw_logo_screen(UIAssets *uiAssets)
-{
-    Vector2 pos = {59, 20};
-    DrawTextureV(uiAssets->buildmanFactoryLogo, pos, WHITE);
-}
-
-void draw_text_button_centered(UIText *text, Rectangle *buttonRect, int padding, int height)
-{
-    int textSize = MeasureText(text->text, text->fontSize);
-    int centerScreenWidth = (SCREEN_WIDTH / 2) - (textSize / 2);
-
-    buttonRect->x = centerScreenWidth - padding;
-    buttonRect->y = height - padding;
-    buttonRect->width = textSize + (padding * 2);
-    buttonRect->height = text->fontSize + (padding * 2);
-
-    DrawRectangleLinesEx(*buttonRect, 2.0f, BLACK);
-
-    DrawText(text->text, centerScreenWidth, height, text->fontSize, text->textColor);
-}
-
-void draw_text_rect_centered(UIText *text, int padding, int height, bool fill, Color color)
-{
-    int textSize = MeasureText(text->text, text->fontSize);
-    int centerScreenWidth = (SCREEN_WIDTH / 2) - (textSize / 2);
-
-    Rectangle rect;
-    rect.x = centerScreenWidth - padding;
-    rect.y = height - padding;
-    rect.width = textSize + (padding * 2);
-    rect.height = text->fontSize + (padding * 2);
-
-    if (!fill)
-    {
-        DrawRectangleLinesEx(rect, 2.0f, color);
-    }
-    else
-    {
-        DrawRectangleRec(rect, color);
-    }
-
-    DrawText(text->text, centerScreenWidth, height, text->fontSize, text->textColor);
-}
-
-void draw_text_vertical_center(UIText *text, int height)
-{
-    int textSize = MeasureText(text->text, text->fontSize);
-    int centerScreenWidth = (SCREEN_WIDTH / 2) - (textSize / 2);
-    DrawText(text->text, centerScreenWidth, height, text->fontSize, BLACK);
-}
-
-void draw_title_screen(GameState *state)
-{
-    UIText title = {"Big Hex Transport", 50, BLACK};
-    UIText start = {"Start Game", 30, BLACK};
-    UIText exit = {"Exit", 30, BLACK};
-    Rectangle startRect = {0, 0, 0, 0};
-    Rectangle exitRect = {0, 0, 0, 0};
-    draw_text_vertical_center(&title, 100);
-    draw_text_button_centered(&start, &startRect, 10, 320);
-    draw_text_button_centered(&exit, &exitRect, 10, 420);
-    state->events->titleStartButton = startRect;
-    state->events->titleExitButton = exitRect;
-}
+void draw_title_screen(GameState *state) {}
 
 void draw_grid()
 {
@@ -108,18 +51,10 @@ void draw_grid()
     }
 }
 
-void draw_game_ui(GameState *state)
-{
-    DrawTexture(state->uiAssets->stylishUiEnchancement, 0, 0, WHITE);
-    DrawTexture(state->uiAssets->pause, 32, 16, WHITE);
-    DrawTexture(state->uiAssets->play, 96, 16, WHITE);
-    DrawTexture(state->uiAssets->doublePlay, 160, 16, WHITE);
-}
-
 void draw_game_screen(GameState *state)
 {
     BeginMode2D(*(state->camera));
-    if (state->inputs->isGridActive)
+    if (state->events->isGridActive)
     {
         draw_grid();
     }
@@ -131,7 +66,6 @@ void draw_game_screen(GameState *state)
     }
 
     EndMode2D();
-    draw_game_ui(state);
     DrawFPS(600, 20);
 }
 
@@ -161,6 +95,50 @@ void update_camera(GameState *state)
     }
 }
 
+void handleExits(GameState *state, Events *events)
+{
+    if (IsKeyPressed(KEY_ESCAPE) && state->currentScreen == GAMEPLAY)
+    {
+        events->exitGameRequested = true;
+        printf("Wild\n");
+    }
+    else if (WindowShouldClose() || (IsKeyPressed(KEY_ESCAPE) && state->currentScreen == TITLE))
+    {
+        events->exitWindowRequested = true;
+    }
+
+    if (events->exitWindowRequested)
+    {
+        // A request for close window has been issued, we can save data before closing
+        // or just show a message asking for confirmation
+        if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_Z))
+        {
+            events->exitWindow = true;
+        }
+        else if (IsKeyPressed(KEY_N))
+        {
+            switchVisiblityById(state->uiHandler, "closeDialog", false);
+            events->exitWindowRequested = false;
+        }
+    }
+
+    if (events->exitGameRequested)
+    {
+        if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_Z))
+        {
+            state->currentScreen = TITLE;
+            events->isGameStarted = false;
+            events->exitGameRequested = false;
+            switchVisiblityById(state->uiHandler, "backToMenu", false);
+        }
+        else if (IsKeyPressed(KEY_N))
+        {
+            switchVisiblityById(state->uiHandler, "backToMenu", false);
+            events->exitGameRequested = false;
+        }
+    }
+}
+
 void update_draw_frame(GameState *state)
 {
     update_inputs(state);
@@ -169,6 +147,14 @@ void update_draw_frame(GameState *state)
     {
     case LOGO:
     {
+        if (state->frameCounter == 0)
+        {
+            connectButtonById(state->uiHandler, "start", &startButtonEvent);
+            connectButtonById(state->uiHandler, "exit", &exitButtonEvent);
+            connectButtonById(state->uiHandler, "pause", &pauseButtonEvent);
+            connectButtonById(state->uiHandler, "play", &playButtonEvent);
+            connectButtonById(state->uiHandler, "doublePlay", &doublePlayButtonEvent);
+        }
         state->frameCounter++;
 
         if (state->frameCounter > 60)
@@ -179,7 +165,7 @@ void update_draw_frame(GameState *state)
     break;
     case TITLE:
     {
-        if (state->inputs->isGameStarted)
+        if (state->events->isGameStarted)
         {
             state->currentScreen = GAMEPLAY;
         }
@@ -202,37 +188,50 @@ void update_draw_frame(GameState *state)
         break;
     }
 
+    updateUiEvents(state->uiHandler, state->events, state->currentScreen);
+
     BeginDrawing();
     ClearBackground(RAYWHITE);
+
     switch (state->currentScreen)
     {
     case LOGO:
-    {
-        draw_logo_screen(state->uiAssets);
-    }
-    break;
+
+        break;
     case TITLE:
-    {
+
         draw_title_screen(state);
-    }
-    break;
+
+        break;
     case GAMEPLAY:
-    {
+
         draw_game_screen(state);
-    }
-    break;
+
+        break;
     case ENDING:
-    {
+
         draw_ending_screen();
-    }
-    break;
+
+        break;
     default:
         break;
     }
-    if (state->exitWindowRequested)
-    {
-        UIText closingText = {"Are you sure you want to exit program? [Y/N]", 20, WHITE};
-        draw_text_rect_centered(&closingText, 10, SCREEN_HEIGHT / 2 - closingText.fontSize, true, RED);
-    }
+
+    renderSprites(state->uiHandler->sprites, state->uiHandler->countSprites, state->currentScreen);
+    renderTexts(state->uiHandler->texts, state->uiHandler->countTexts, state->currentScreen);
+    renderButtons(state->uiHandler->buttons, state->uiHandler->countButtons, state->currentScreen);
+    renderSpriteButtons(state->uiHandler->spriteButtons, state->uiHandler->countSpriteButtons, state->currentScreen);
+    renderDialogs(state->uiHandler->dialogs, state->uiHandler->countDialogs, state->currentScreen);
     EndDrawing();
+
+    handleExits(state, state->events);
+
+    if (state->events->exitWindowRequested)
+    {
+        switchVisiblityById(state->uiHandler, "closeDialog", true);
+    }
+    if (state->events->exitGameRequested)
+    {
+        switchVisiblityById(state->uiHandler, "backToMenu", true);
+    }
 }

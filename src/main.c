@@ -1,7 +1,9 @@
 #include "../include/main.h"
 #include "../include/game.h"
 #include "../include/level.h"
+#include "../include/ui.h"
 #include <raylib.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #if defined(PLATFORM_WEB)
@@ -18,24 +20,7 @@ void unloadGameAssets(Level *level)
     free(level->spawner);
 }
 
-void loadUIAssets(UIAssets *uiAssets)
-{
-    uiAssets->buildmanFactoryLogo = LoadTexture("assets/ui/BuildmanFactoryIcon.png");
-    uiAssets->pause = LoadTexture("assets/ui/Pause.png");
-    uiAssets->play = LoadTexture("assets/ui/Play.png");
-    uiAssets->doublePlay = LoadTexture("assets/ui/DoublePlay.png");
-    uiAssets->stylishUiEnchancement = LoadTexture("assets/ui/Stylish_UI_enhancement.png");
-}
-
-void unloadUIAssets(UIAssets *uiAssets)
-{
-    UnloadTexture(uiAssets->buildmanFactoryLogo);
-    UnloadTexture(uiAssets->pause);
-    UnloadTexture(uiAssets->play);
-    UnloadTexture(uiAssets->doublePlay);
-    UnloadTexture(uiAssets->stylishUiEnchancement);
-};
-void init_game(Level *level, GameInputs *inputs, GameState *state)
+void init_game(Level *level, Events *events, UIHandler *uiHandler, GameState *state)
 {
     create_game_level(level->levelArr);
 
@@ -47,14 +32,18 @@ void init_game(Level *level, GameInputs *inputs, GameState *state)
     prepare_spawner(level);
     // print_level(level->levelArr);
 
-    inputs->isGridActive = false;
+    events->isGridActive = false;
+    events->exitWindow = false;
+    events->exitWindowRequested = false;
 
-    state->inputs = inputs;
+    loadUIAssets(uiHandler->assets);
+    createUI(uiHandler);
+
+    state->events = events;
     state->currentScreen = LOGO;
     state->frameCounter = 0;
     state->level = level;
-    state->exitWindowRequested = false;
-    state->exitWindow = false;
+    state->uiHandler = uiHandler;
 }
 
 #if defined(PLATFORM_WEB)
@@ -66,19 +55,18 @@ int main()
     // start raylib
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Big Hex Transport");
 
-    UIAssets uiAssets;
-    loadUIAssets(&uiAssets);
-
     Level level;
-    GameInputs inputs;
-    ButtonEvents events;
+    Events events;
     Camera2D camera;
     camera.zoom = 1.0f;
+
+    UIHandler uiHandler;
+    UIAssets uiAssets;
+    uiHandler.assets = &uiAssets;
+
     GameState state;
 
-    init_game(&level, &inputs, &state);
-    state.uiAssets = &uiAssets;
-    state.events = &events;
+    init_game(&level, &events, &uiHandler, &state);
     state.camera = &camera;
 
 #if defined(PLATFORM_WEB)
@@ -87,31 +75,13 @@ int main()
 #else
     SetTargetFPS(60);
     // Main game loop
-    while (!state.exitWindow)
+    while (!events.exitWindow)
     {
-        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE))
-        {
-            state.exitWindowRequested = true;
-        }
-        if (state.exitWindowRequested)
-        {
-            // A request for close window has been issued, we can save data before closing
-            // or just show a message asking for confirmation
-            if (IsKeyPressed(KEY_Y) || IsKeyPressed(KEY_Z))
-            {
-                state.exitWindow = true;
-            }
-            else if (IsKeyPressed(KEY_N))
-            {
-                state.exitWindowRequested = false;
-            }
-        }
         update_draw_frame(&state);
     }
 #endif
 
     unloadGameAssets(&level);
-    unloadUIAssets(&uiAssets);
     CloseWindow();
 
     return 0;
