@@ -2,6 +2,7 @@
 #include "../include/ui.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -43,15 +44,14 @@ void drawTitleScreen(LoopState *state) {}
 
 void drawGrid()
 {
-    int row = 0;
-    for (int col = 0; col < LEVEL_WIDTH; col++)
+    for (int i = 0; i < LEVEL_WIDTH + 1; i++)
     {
-        for (int row = 0; row < LEVEL_HEIGHT; row++)
-        {
+        DrawLine(i * CELL_SIZE, 0, i * CELL_SIZE, LEVEL_WIDTH * CELL_SIZE, GRAY);
+    }
 
-            Rectangle rect = {col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE};
-            DrawRectangleLinesEx(rect, 0.5f, GRAY);
-        }
+    for (int i = 0; i < LEVEL_HEIGHT + 1; i++)
+    {
+        DrawLine(0, i * CELL_SIZE, LEVEL_HEIGHT * CELL_SIZE, i * CELL_SIZE, GRAY);
     }
 }
 
@@ -61,12 +61,6 @@ void drawGameScreen(LoopState *state)
     if (state->events->isGridActive)
     {
         drawGrid();
-    }
-
-    for (int i = 0; i < state->level->countSpawner; i++)
-    {
-        Spawner spawner = state->level->spawner[i];
-        DrawTexture(spawner.texture, spawner.x * CELL_SIZE, spawner.y * CELL_SIZE, WHITE);
     }
 
     EndMode2D();
@@ -95,7 +89,7 @@ void updateCamera(LoopState *state)
         // Uses log scaling to provide consistent zoom speed
         float scale = 0.2f * wheel;
         // the last to numbers are the min and the max
-        state->camera->zoom = Clamp(expf(logf(state->camera->zoom) + scale), 1.0f, 2.0f);
+        state->camera->zoom = Clamp(expf(logf(state->camera->zoom) + scale), 0.125f, 2.5f);
     }
 }
 

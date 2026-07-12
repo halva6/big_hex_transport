@@ -1,6 +1,5 @@
 #ifndef LOOP_H
 #define LOOP_H
-#include "../include/level.h"
 #include "../include/ui.h"
 #include "main.h"
 #include "raylib.h"
@@ -10,7 +9,6 @@ typedef struct LoopState
     Events *events;
     GameScreen currentScreen;
     unsigned int frameCounter;
-    Level *level;
     Camera2D *camera;
     UIHandler *uiHandler;
 }LoopState;
