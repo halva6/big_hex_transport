@@ -1,11 +1,11 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef LOOP_H
+#define LOOP_H
 #include "../include/level.h"
 #include "../include/ui.h"
 #include "main.h"
 #include "raylib.h"
 
-typedef struct GameState
+typedef struct LoopState
 {
     Events *events;
     GameScreen currentScreen;
@@ -13,9 +13,9 @@ typedef struct GameState
     Level *level;
     Camera2D *camera;
     UIHandler *uiHandler;
-}GameState;
+}LoopState;
 
-void update_draw_frame(GameState *state);
+void updateDrawFrame(LoopState *state);
 
 void startButtonEvent(Events *events);
 void exitButtonEvent(Events *events);
@@ -23,5 +23,6 @@ void pauseButtonEvent(Events *events);
 void playButtonEvent(Events *events);
 void doublePlayButtonEvent(Events *events);
 void exitGamePlayButtonEvent(Events *events);
+void beltButtonEvent(Events *events);
 
 #endif

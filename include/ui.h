@@ -13,6 +13,7 @@ typedef struct UIAssets
     Texture2D doublePlay;
     Texture2D stylishUiEnchancement;
     Texture2D exitGamePlay;
+    Texture2D beltButton;
 }
 UIAssets;
 

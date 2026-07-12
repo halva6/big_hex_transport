@@ -1,11 +1,11 @@
-#include "../include/game.h"
+#include "../include/loop.h"
 #include "../include/ui.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <stdbool.h>
 #include <stdio.h>
 
-void update_inputs(GameState *state)
+void updateInputs(LoopState *state)
 {
     // key inputs
     if (IsKeyReleased(KEY_G))
@@ -33,13 +33,15 @@ void doublePlayButtonEvent(Events *events) { fprintf(stderr, "double play \n"); 
 
 void exitGamePlayButtonEvent(Events *events) { events->exitGameRequested = true; }
 
-void draw_logo_screen(UIAssets *uiAssets) {}
+void beltButtonEvent(Events *events) { fprintf(stderr, "belt button \n"); }
 
-void update_game(GameState *state) {}
+void drawLogoScreen(UIAssets *uiAssets) {}
 
-void draw_title_screen(GameState *state) {}
+void updateGame(LoopState *state) {}
 
-void draw_grid()
+void drawTitleScreen(LoopState *state) {}
+
+void drawGrid()
 {
     int row = 0;
     for (int col = 0; col < LEVEL_WIDTH; col++)
@@ -53,12 +55,12 @@ void draw_grid()
     }
 }
 
-void draw_game_screen(GameState *state)
+void drawGameScreen(LoopState *state)
 {
     BeginMode2D(*(state->camera));
     if (state->events->isGridActive)
     {
-        draw_grid();
+        drawGrid();
     }
 
     for (int i = 0; i < state->level->countSpawner; i++)
@@ -73,7 +75,7 @@ void draw_game_screen(GameState *state)
 
 void draw_ending_screen() {}
 
-void update_camera(GameState *state)
+void updateCamera(LoopState *state)
 {
     // Zoom based on mouse wheel
     float wheel = GetMouseWheelMove();
@@ -97,7 +99,7 @@ void update_camera(GameState *state)
     }
 }
 
-void handleExits(GameState *state, Events *events)
+void handleExits(LoopState *state, Events *events)
 {
     if (IsKeyPressed(KEY_ESCAPE) && state->currentScreen == GAMEPLAY)
     {
@@ -140,10 +142,10 @@ void handleExits(GameState *state, Events *events)
     }
 }
 
-void update_draw_frame(GameState *state)
+void updateDrawFrame(LoopState *state)
 {
-    update_inputs(state);
-    update_camera(state);
+    updateInputs(state);
+    updateCamera(state);
     switch (state->currentScreen)
     {
     case LOGO:
@@ -166,7 +168,7 @@ void update_draw_frame(GameState *state)
     break;
     case GAMEPLAY:
     {
-        update_game(state);
+        updateGame(state);
     }
     break;
     case ENDING:
@@ -193,12 +195,12 @@ void update_draw_frame(GameState *state)
         break;
     case TITLE:
 
-        draw_title_screen(state);
+        drawTitleScreen(state);
 
         break;
     case GAMEPLAY:
 
-        draw_game_screen(state);
+        drawGameScreen(state);
 
         break;
     case ENDING:

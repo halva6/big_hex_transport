@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void create_game_level(unsigned int *level)
+void createGameLevel(unsigned int *level)
 {
     for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++)
     {
@@ -10,7 +10,7 @@ void create_game_level(unsigned int *level)
     }
 }
 
-void prepare_spawner(Level *level)
+void prepareSpawner(Level *level)
 {
     int randomPos[level->countSpawner];
     randomPos[0] = GetRandomValue(0, ((LEVEL_WIDTH - 1) * (LEVEL_HEIGHT - 1)) - 1);
@@ -44,7 +44,7 @@ void prepare_spawner(Level *level)
     }
 }
 
-void print_level(unsigned int *level)
+void printLevel(unsigned int *level)
 {
     for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++)
     {
